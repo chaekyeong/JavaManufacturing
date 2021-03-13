@@ -6,7 +6,11 @@ import java.sql.SQLException;
 
 public class DatabaseConnection {
 	private static Connection con = null;
-
+	
+	private DatabaseConnection() {
+		
+	}
+	
 	static {
 		String url = "jdbc:oracle:thin:@//localhost:1521/xepdb1";
 		String user = "ace";
@@ -23,11 +27,15 @@ public class DatabaseConnection {
 		return con;
 	}
 	
-	public static void close() throws SQLException {
-		if(con != null) {
-			if(!con.isClosed()) {
-				con.close();
+	public static void close() {
+		try {
+			if(con != null) {
+				if(!con.isClosed()) {
+					con.close();
+				}
 			}
-		}
+		} catch(SQLException e) {
+			e.printStackTrace();
+		} 
 	}
 }

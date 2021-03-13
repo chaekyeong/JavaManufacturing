@@ -2,9 +2,9 @@ package com.jdbc;
 
 public class Employee {
 
-	int emp_id;
-	String emp_name;
-	String emp_address;
+	private int emp_id;
+	private String emp_name;
+	private String emp_address;
 
 	public Employee() {
 	}

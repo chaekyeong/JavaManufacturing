@@ -13,23 +13,44 @@ public class EmployeeDaoImplementation implements EmployeeDao {
 
 	@Override
 	public int insert(Employee emp) throws SQLException {
-
-		String query = "insert into employee(emp_name, " + "emp_address) VALUES (?, ?)";
+		String query = "insert into employee(emp_name, emp_address) VALUES (?, ?)";
 		PreparedStatement ps = con.prepareStatement(query);
+		
 		ps.setString(1, emp.getEmp_name());
 		ps.setString(2, emp.getEmp_address());
+		
 		int n = ps.executeUpdate();
+		
 		return n;
 	}
 
 	@Override
-	public void delete(int id) throws SQLException {
-		String query = "delete from employee where emp_id =?";
+	public int update(Employee emp) throws SQLException {
+		String query = "update employee set emp_name= ?, emp_address= ? where emp_id = ?";
 		PreparedStatement ps = con.prepareStatement(query);
-		ps.setInt(1, id);
-		ps.executeUpdate();
-	}
+		
+		ps.setString(1, emp.getEmp_name());
+		ps.setString(2, emp.getEmp_address());
+		ps.setInt(3, emp.getEmp_id());
+		
+		int n = ps.executeUpdate();
+		
+		return n;
 
+	}
+	
+	@Override
+	public int delete(int id) throws SQLException {
+		String query = "delete from employee where emp_id = ?";
+		PreparedStatement ps = con.prepareStatement(query);
+		
+		ps.setInt(1, id);
+		
+		int n = ps.executeUpdate();
+		
+		return n;
+	}
+	
 	@Override
 	public Employee getEmployee(int id) throws SQLException {
 
@@ -59,26 +80,16 @@ public class EmployeeDaoImplementation implements EmployeeDao {
 		String query = "select * from employee";
 		PreparedStatement ps = con.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
-		List<Employee> ls = new ArrayList<Employee>();
+		List<Employee> employees = new ArrayList<Employee>();
 
 		while (rs.next()) {
-			Employee emp = new Employee();
-			emp.setEmp_id(rs.getInt("emp_id"));
-			emp.setEmp_name(rs.getString("emp_name"));
-			emp.setEmp_address(rs.getString("emp_address"));
-			ls.add(emp);
+			Employee employee = new Employee();
+			employee.setEmp_id(rs.getInt("emp_id"));
+			employee.setEmp_name(rs.getString("emp_name"));
+			employee.setEmp_address(rs.getString("emp_address"));
+			employees.add(employee);
 		}
-		return ls;
-	}
-
-	@Override
-	public void update(Employee emp) throws SQLException {
-
-		String query = "update employee set emp_name=?, " + " emp_address= ? where emp_id = ?";
-		PreparedStatement ps = con.prepareStatement(query);
-		ps.setString(1, emp.getEmp_name());
-		ps.setString(2, emp.getEmp_address());
-		ps.setInt(3, emp.getEmp_id());
-		ps.executeUpdate();
+		
+		return employees;
 	}
 }
