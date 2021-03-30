@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.util.prefs.Preferences;
 
 import ch.makery.address.model.Person;
+import ch.makery.address.view.BirthdayStatisticsController;
 import ch.makery.address.view.PersonEditDialogController;
 import ch.makery.address.view.PersonOverviewController;
+import ch.makery.address.view.RootLayoutController;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -54,21 +56,21 @@ public class MainApp extends Application {
     /**
      * 상위 레이아웃을 초기화한다.
      */
-    public void initRootLayout() {
-        try {
-            // fxml 파일에서 상위 레이아웃을 가져온다.
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("view/RootLayout.fxml"));
-            rootLayout = (BorderPane) loader.load();
-
-            // 상위 레이아웃을 포함하는 scene을 보여준다.
-            Scene scene = new Scene(rootLayout);
-            primaryStage.setScene(scene);
-            primaryStage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+//    public void initRootLayout() {
+//        try {
+//            // fxml 파일에서 상위 레이아웃을 가져온다.
+//            FXMLLoader loader = new FXMLLoader();
+//            loader.setLocation(MainApp.class.getResource("view/RootLayout.fxml"));
+//            rootLayout = (BorderPane) loader.load();
+//
+//            // 상위 레이아웃을 포함하는 scene을 보여준다.
+//            Scene scene = new Scene(rootLayout);
+//            primaryStage.setScene(scene);
+//            primaryStage.show();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     /**
      * 상위 레이아웃 안에 연락처 요약(person overview)을 보여준다.
@@ -129,6 +131,33 @@ public class MainApp extends Application {
         }
     }
     
+    /**
+     * 생일 통계를 보여주기 위해 다이얼로그를 연다.
+     */
+    public void showBirthdayStatistics() {
+        try {
+            // FXML 파일을 불러와서 팝업의 새로운 Stage를 만든다.
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(MainApp.class.getResource("view/BirthdayStatistics.fxml"));
+            AnchorPane page = (AnchorPane) loader.load();
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Birthday Statistics");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(primaryStage);
+            Scene scene = new Scene(page);
+            dialogStage.setScene(scene);
+
+            // 연락처를 컨트롤러에 설정한다.
+            BirthdayStatisticsController controller = loader.getController();
+            controller.setPersonData(personData);
+
+            dialogStage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
 	/**
 	 * 메인 스테이지를 반환한다.
 	 * @return
@@ -149,6 +178,31 @@ public class MainApp extends Application {
 
         showPersonOverview();
     }
+	
+	/**
+	 * 상위 레이아웃을 초기화
+	 */
+	public void initRootLayout() {
+	    try {
+	        // fxml 파일에서 상위 레이아웃을 가져온다.
+	        FXMLLoader loader = new FXMLLoader();
+	        loader.setLocation(MainApp.class
+	                .getResource("view/RootLayout.fxml"));
+	        rootLayout = (BorderPane) loader.load();
+
+	        // 상위 레이아웃을 포함하는 scene을 보여준다.
+	        Scene scene = new Scene(rootLayout);
+	        primaryStage.setScene(scene);
+
+	        // 컨트롤러한테 MainApp 접근 권한을 준다.
+	        RootLayoutController controller = loader.getController();
+	        controller.setMainApp(this);
+
+	        primaryStage.show();
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	}
 	
     public static void main(String[] args) {
         launch(args);
