@@ -1,16 +1,21 @@
 package ch.makery.address;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.prefs.Preferences;
 
 import ch.makery.address.model.Person;
+import ch.makery.address.view.PersonEditDialogController;
 import ch.makery.address.view.PersonOverviewController;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class MainApp extends Application {
@@ -46,16 +51,6 @@ public class MainApp extends Application {
 		return personData;
 	}
 	
-    @Override
-    public void start(Stage primaryStage) {
-        this.primaryStage = primaryStage;
-        this.primaryStage.setTitle("AddressApp");
-
-        initRootLayout();
-
-        showPersonOverview();
-    }
-
     /**
      * 상위 레이아웃을 초기화한다.
      */
@@ -96,7 +91,44 @@ public class MainApp extends Application {
             e.printStackTrace();
         }
     }
+    
+    /**
+     * person의 자세한 정보를 변경하기 위해 다이얼로그를 연다.
+     * 만일 사용자가 OK를 클릭하면 주어진 person에 내용을 저장한 후 true를 반환한다.
+     *
+     * @param person the person object to be edited
+     * @return true if the user clicked OK, false otherwise.
+     */
+    public boolean showPersonEditDialog(Person person) {
+        try {
+            // fxml 파일을 로드하고 나서 새로운 스테이지를 만든다.
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(MainApp.class.getResource("view/PersonEditDialog.fxml"));
+            AnchorPane page = (AnchorPane) loader.load();
 
+            // 다이얼로그 스테이지를 만든다.
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Edit Person");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(primaryStage);
+            Scene scene = new Scene(page);
+            dialogStage.setScene(scene);
+
+            // person을 컨트롤러에 설정한다.
+            PersonEditDialogController controller = loader.getController();
+            controller.setDialogStage(dialogStage);
+            controller.setPerson(person);
+
+            // 다이얼로그를 보여주고 사용자가 닫을 때까지 기다린다.
+            dialogStage.showAndWait();
+
+            return controller.isOkClicked();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
 	/**
 	 * 메인 스테이지를 반환한다.
 	 * @return
@@ -104,8 +136,38 @@ public class MainApp extends Application {
 	public Stage getPrimaryStage() {
 		return primaryStage;
 	}
+	
+	@Override
+    public void start(Stage primaryStage) {
+        this.primaryStage = primaryStage;
+        this.primaryStage.setTitle("AddressApp");
+        
+     // 애플리케이션 아이콘을 설정한다.
+        this.primaryStage.getIcons().add(new Image("file:resources/images/flaticon.png"));
+        
+        initRootLayout();
 
+        showPersonOverview();
+    }
+	
     public static void main(String[] args) {
         launch(args);
+    }
+    
+    /**
+     * 연락처 파일 환경설정을 반환한다.
+     * 즉 파일은 마지막으로 열린 것이고, 환경설정은 OS 특정 레지스트리로부터 읽는다.
+     * 만일 preference를 찾지 못하면 null을 반환한다.
+     *
+     * @return
+     */
+    public File getPersonFilePath() {
+        Preferences prefs = Preferences.userNodeForPackage(MainApp.class);
+        String filePath = prefs.get("filePath", null);
+        if (filePath != null) {
+            return new File(filePath);
+        } else {
+            return null;
+        }
     }
 }
